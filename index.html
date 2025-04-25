@@ -187,15 +187,58 @@
         .mt-4 {
             margin-top: 40px;
         }
+        .profile-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .profile-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-right: 20px;
+        }
+        .profile-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        .profile-info p {
+            color: #aaa;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        .tab.active {
+            border-bottom: 3px solid var(--secondary);
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
             <h1><i class="fas fa-coins"></i> Mining Money Bank</h1>
-            <div>
+            <div id="authLinks">
                 <a href="#" class="nav-link" onclick="showLogin()">Login</a>
                 <a href="#" class="nav-link" onclick="showRegistration()">Register</a>
+            </div>
+            <div id="userNav" class="hidden">
+                <a href="#" class="nav-link" onclick="showDashboard()"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="#" class="nav-link" onclick="showProfile()"><i class="fas fa-user"></i> Profile</a>
+                <a href="#" class="nav-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
     </header>
@@ -306,35 +349,180 @@
             <div class="card">
                 <h2><i class="fas fa-history"></i> Transaction History</h2>
                 <div class="transaction-history" id="transactionHistory">
-                    <!-- Transactions will appear here -->
                     <div class="text-center">
                         <p>No transactions yet</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="text-center mt-4">
-                <button class="btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <!-- Profile Section -->
+        <div id="profileSection" class="hidden">
+            <div class="card">
+                <div class="profile-section">
+                    <div class="profile-icon">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h3 id="profileName">User Name</h3>
+                        <p id="profileEmail">user@example.com</p>
+                        <p id="profilePhone">+92 1234567890</p>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('accountInfo')">Account Info</div>
+                    <div class="tab" onclick="switchTab('paymentMethods')">Payment Methods</div>
+                    <div class="tab" onclick="switchTab('security')">Security</div>
+                </div>
+
+                <div id="accountInfo" class="tab-content active">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="profileNameInput" class="form-control" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="profileEmailInput" class="form-control" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="profilePhoneInput" class="form-control" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Registration Date</label>
+                        <input type="text" id="profileRegDate" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <div id="paymentMethods" class="tab-content">
+                    <div class="form-group">
+                        <label>EasyPaisa Account</label>
+                        <input type="text" id="easypaisaAccount" class="form-control" placeholder="Enter EasyPaisa number">
+                    </div>
+                    <div class="form-group">
+                        <label>JazzCash Account</label>
+                        <input type="text" id="jazzcashAccount" class="form-control" placeholder="Enter JazzCash number">
+                    </div>
+                    <div class="form-group">
+                        <label>Bank Account</label>
+                        <input type="text" id="bankAccount" class="form-control" placeholder="Enter bank account details">
+                    </div>
+                    <button class="btn" onclick="savePaymentMethods()">Save Payment Methods</button>
+                </div>
+
+                <div id="security" class="tab-content">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" class="form-control" placeholder="Enter current password">
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="Enter new password">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmNewPassword" class="form-control" placeholder="Confirm new password">
+                    </div>
+                    <button class="btn" onclick="changePassword()">Change Password</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Mock User Data
-        let users = [];
+        // Load users from localStorage or initialize empty array
+        let users = JSON.parse(localStorage.getItem('mmb_users')) || [];
         let currentUser = null;
         let profitInterval;
+
+        // Initialize the app
+        function initApp() {
+            // Check if user is already logged in
+            const loggedInUserEmail = localStorage.getItem('mmb_loggedInUser');
+            if (loggedInUserEmail) {
+                const user = users.find(u => u.email === loggedInUserEmail);
+                if (user) {
+                    currentUser = user;
+                    showDashboard();
+                    startProfitCalculation();
+                }
+            }
+        }
+
+        // Save users to localStorage
+        function saveUsers() {
+            localStorage.setItem('mmb_users', JSON.stringify(users));
+        }
 
         // Show Registration Form
         function showRegistration() {
             document.getElementById('loginForm').classList.add('hidden');
             document.getElementById('registrationForm').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('profileSection').classList.add('hidden');
+            document.getElementById('authLinks').classList.remove('hidden');
+            document.getElementById('userNav').classList.add('hidden');
         }
 
         // Show Login Form
         function showLogin() {
             document.getElementById('registrationForm').classList.add('hidden');
             document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('profileSection').classList.add('hidden');
+            document.getElementById('authLinks').classList.remove('hidden');
+            document.getElementById('userNav').classList.add('hidden');
+        }
+
+        // Show Dashboard
+        function showDashboard() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registrationForm').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('profileSection').classList.add('hidden');
+            document.getElementById('authLinks').classList.add('hidden');
+            document.getElementById('userNav').classList.remove('hidden');
+            updateDashboard();
+        }
+
+        // Show Profile
+        function showProfile() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('profileSection').classList.remove('hidden');
+            
+            // Populate profile data
+            document.getElementById('profileName').textContent = currentUser.name;
+            document.getElementById('profileEmail').textContent = currentUser.email;
+            document.getElementById('profilePhone').textContent = currentUser.phone;
+            document.getElementById('profileNameInput').value = currentUser.name;
+            document.getElementById('profileEmailInput').value = currentUser.email;
+            document.getElementById('profilePhoneInput').value = currentUser.phone;
+            document.getElementById('profileRegDate').value = new Date(currentUser.registrationDate).toLocaleString();
+            
+            // Load payment methods if they exist
+            if (currentUser.paymentMethods) {
+                document.getElementById('easypaisaAccount').value = currentUser.paymentMethods.easypaisa || '';
+                document.getElementById('jazzcashAccount').value = currentUser.paymentMethods.jazzcash || '';
+                document.getElementById('bankAccount').value = currentUser.paymentMethods.bank || '';
+            }
+        }
+
+        // Switch between tabs
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Activate selected tab
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
         // Register a New User
@@ -350,7 +538,13 @@
                 return;
             }
 
-            users.push({ 
+            // Check if user already exists
+            if (users.some(u => u.email === email)) {
+                alert("User with this email already exists!");
+                return;
+            }
+
+            const newUser = { 
                 name, 
                 email, 
                 phone, 
@@ -359,8 +553,14 @@
                 totalDeposited: 0,
                 profit: 0,
                 transactions: [],
-                depositHistory: []
-            });
+                depositHistory: [],
+                registrationDate: new Date().getTime(),
+                paymentMethods: {}
+            };
+            
+            users.push(newUser);
+            saveUsers();
+            
             alert("Registration successful! Please login.");
             showLogin();
         }
@@ -373,10 +573,8 @@
             const user = users.find(u => u.email === email && u.password === password);
             if (user) {
                 currentUser = user;
-                document.getElementById('loginForm').classList.add('hidden');
-                document.getElementById('registrationForm').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                updateDashboard();
+                localStorage.setItem('mmb_loggedInUser', email);
+                showDashboard();
                 startProfitCalculation();
             } else {
                 alert("Invalid email or password!");
@@ -387,8 +585,8 @@
         function logout() {
             clearInterval(profitInterval);
             currentUser = null;
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
+            localStorage.removeItem('mmb_loggedInUser');
+            showLogin();
         }
 
         // Deposit Funds
@@ -429,10 +627,15 @@
                     date: new Date().getTime()
                 });
 
+                saveUsers();
                 updateDashboard();
                 document.getElementById('depositStatus').textContent = "Deposit completed successfully!";
                 document.getElementById('depositStatus').className = "completed";
                 alert(`$${amount.toFixed(2)} deposited via ${method}. Transaction ID: ${trxId}`);
+                
+                // Clear form
+                document.getElementById('depositAmount').value = '';
+                document.getElementById('trxId').value = '';
             }, 300000); // 5 minutes = 300,000 milliseconds
         }
 
@@ -473,10 +676,14 @@
                 
                 currentUser.transactions.unshift(transaction);
 
+                saveUsers();
                 updateDashboard();
                 document.getElementById('withdrawStatus').textContent = "Withdrawal completed successfully!";
                 document.getElementById('withdrawStatus').className = "completed";
                 alert(`$${amount.toFixed(2)} withdrawn via ${method}.`);
+                
+                // Clear form
+                document.getElementById('withdrawAmount').value = '';
             }, 300000); // 5 minutes
         }
 
@@ -500,13 +707,53 @@
                     };
                     
                     currentUser.transactions.unshift(transaction);
+                    saveUsers();
                     updateDashboard();
                 }
             }, 86400000); // 24 hours = 86,400,000 milliseconds
         }
 
+        // Save payment methods
+        function savePaymentMethods() {
+            currentUser.paymentMethods = {
+                easypaisa: document.getElementById('easypaisaAccount').value,
+                jazzcash: document.getElementById('jazzcashAccount').value,
+                bank: document.getElementById('bankAccount').value
+            };
+            
+            saveUsers();
+            alert("Payment methods saved successfully!");
+        }
+
+        // Change password
+        function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            if (currentPassword !== currentUser.password) {
+                alert("Current password is incorrect!");
+                return;
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                alert("New passwords do not match!");
+                return;
+            }
+
+            currentUser.password = newPassword;
+            saveUsers();
+            
+            alert("Password changed successfully!");
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+
         // Update Dashboard
         function updateDashboard() {
+            if (!currentUser) return;
+            
             // Update balance stats
             document.getElementById('userBalance').textContent = `$${currentUser.balance.toFixed(2)}`;
             document.getElementById('totalDeposited').textContent = `$${currentUser.totalDeposited.toFixed(2)}`;
@@ -514,12 +761,16 @@
 
             // Update withdraw condition message
             const withdrawCondition = document.getElementById('withdrawCondition');
+            const withdrawBtn = document.getElementById('withdrawBtn');
+            
             if (currentUser.totalDeposited === 0) {
                 withdrawCondition.textContent = "Note: You need to make deposits before you can withdraw.";
                 withdrawCondition.className = "processing";
+                withdrawBtn.disabled = true;
             } else {
                 withdrawCondition.textContent = `Note: You can withdraw up to $${(currentUser.totalDeposited / 2).toFixed(2)} (50% of your total deposits).`;
                 withdrawCondition.className = "completed";
+                withdrawBtn.disabled = false;
             }
 
             // Update transaction history
@@ -530,7 +781,7 @@
         function updateTransactionHistory() {
             const historyList = document.getElementById('transactionHistory');
             
-            if (currentUser.transactions.length === 0) {
+            if (!currentUser || currentUser.transactions.length === 0) {
                 historyList.innerHTML = '<div class="text-center"><p>No transactions yet</p></div>';
                 return;
             }
@@ -580,6 +831,9 @@
                 historyList.appendChild(transactionItem);
             });
         }
+
+        // Initialize the app when page loads
+        window.onload = initApp;
     </script>
 </body>
-</html>
+                    </html>
