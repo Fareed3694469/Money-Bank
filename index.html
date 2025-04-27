@@ -225,6 +225,22 @@
         .tab-content.active {
             display: block;
         }
+        .profit-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1abb9c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
@@ -309,7 +325,7 @@
                     <label for="depositMethod">Payment Method</label>
                     <select id="depositMethod" class="form-control">
                         <option value="nayapay">Nayapay (Account: 03045167816)</option>
-                        <option value="easypaisa">EasyPaisa</option>
+                        <option value="easypaisa">EasyPaisa (Account: 03045167816)</option>
                         <option value="jazzcash">JazzCash</option>
                         <option value="crypto">Crypto (USDT/BTC)</option>
                     </select>
@@ -446,6 +462,15 @@
                     currentUser = user;
                     showDashboard();
                     startProfitCalculation();
+                    
+                    // Check if profit needs to be added (based on last profit time)
+                    const now = new Date().getTime();
+                    const lastProfitTime = currentUser.lastProfitTime || 0;
+                    const hoursSinceLastProfit = (now - lastProfitTime) / (1000 * 60 * 60);
+                    
+                    if (hoursSinceLastProfit >= 24 && currentUser.totalDeposited > 0) {
+                        addDailyProfit();
+                    }
                 }
             }
         }
@@ -555,7 +580,8 @@
                 transactions: [],
                 depositHistory: [],
                 registrationDate: new Date().getTime(),
-                paymentMethods: {}
+                paymentMethods: {},
+                lastProfitTime: 0
             };
             
             users.push(newUser);
@@ -576,6 +602,15 @@
                 localStorage.setItem('mmb_loggedInUser', email);
                 showDashboard();
                 startProfitCalculation();
+                
+                // Check if profit needs to be added
+                const now = new Date().getTime();
+                const lastProfitTime = currentUser.lastProfitTime || 0;
+                const hoursSinceLastProfit = (now - lastProfitTime) / (1000 * 60 * 60);
+                
+                if (hoursSinceLastProfit >= 24 && currentUser.totalDeposited > 0) {
+                    addDailyProfit();
+                }
             } else {
                 alert("Invalid email or password!");
             }
@@ -687,30 +722,46 @@
             }, 300000); // 5 minutes
         }
 
-        // Calculate 10% Daily Profit
-        function startProfitCalculation() {
-            // Clear any existing interval
-            clearInterval(profitInterval);
+        // Add daily profit (10%)
+        function addDailyProfit() {
+            const profit = currentUser.totalDeposited * 0.10;
+            currentUser.profit += profit;
+            currentUser.balance += profit;
+            currentUser.lastProfitTime = new Date().getTime();
+            
+            const transaction = {
+                type: "Profit",
+                method: "Auto",
+                amount: profit,
+                date: new Date().toLocaleString()
+            };
+            
+            currentUser.transactions.unshift(transaction);
+            saveUsers();
+            updateDashboard();
+            
+            // Show notification
+            const profitNotification = document.createElement('div');
+            profitNotification.className = 'profit-notification';
+            profitNotification.innerHTML = `
+                <p>Daily Profit Added: $${profit.toFixed(2)}</p>
+            `;
+            document.body.appendChild(profitNotification);
+            
+            setTimeout(() => {
+                profitNotification.remove();
+            }, 5000);
+        }
 
-            // Calculate profit every 24 hours (for demo: every 10 seconds)
+        // Start profit calculation timer (24 hours)
+        function startProfitCalculation() {
+            clearInterval(profitInterval);
+            
             profitInterval = setInterval(() => {
-                if (currentUser.totalDeposited > 0) {
-                    const profit = currentUser.totalDeposited * 0.10; // 10% of total deposited
-                    currentUser.profit += profit;
-                    currentUser.balance += profit;
-                    
-                    const transaction = {
-                        type: "Profit",
-                        method: "Auto",
-                        amount: profit,
-                        date: new Date().toLocaleString()
-                    };
-                    
-                    currentUser.transactions.unshift(transaction);
-                    saveUsers();
-                    updateDashboard();
+                if (currentUser && currentUser.totalDeposited > 0) {
+                    addDailyProfit();
                 }
-            }, 86400000); // 24 hours = 86,400,000 milliseconds
+            }, 86400000); // 24 hours in milliseconds
         }
 
         // Save payment methods
@@ -836,4 +887,4 @@
         window.onload = initApp;
     </script>
 </body>
-                    </html>
+</html>
