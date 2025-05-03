@@ -691,7 +691,7 @@
 
             // Check if total deposited is at least 2x the withdrawal amount
             if (currentUser.totalDeposited < (amount * 2)) {
-                alert(`You need to deposit at least $${(amount * 2).toFixed(2)} before withdrawing $${amount.toFixed(2)}.`);
+                alert(`You need to deposit at least PKR${(amount * 2).toFixed(2)} before withdrawing PKR${amount.toFixed(2)}.`);
                 return;
             }
 
@@ -744,7 +744,7 @@
             const profitNotification = document.createElement('div');
             profitNotification.className = 'profit-notification';
             profitNotification.innerHTML = `
-                <p>Daily Profit Added: $${profit.toFixed(2)}</p>
+                <p>Daily Profit Added: PKR${profit.toFixed(2)}</p>
             `;
             document.body.appendChild(profitNotification);
             
@@ -806,9 +806,9 @@
             if (!currentUser) return;
             
             // Update balance stats
-            document.getElementById('userBalance').textContent = `$${currentUser.balance.toFixed(2)}`;
-            document.getElementById('totalDeposited').textContent = `$${currentUser.totalDeposited.toFixed(2)}`;
-            document.getElementById('dailyProfit').textContent = `$${currentUser.profit.toFixed(2)}`;
+            document.getElementById('userBalance').textContent = `PKR${currentUser.balance.toFixed(2)}`;
+            document.getElementById('totalDeposited').textContent = `PKR${currentUser.totalDeposited.toFixed(2)}`;
+            document.getElementById('dailyProfit').textContent = `PKR${currentUser.profit.toFixed(2)}`;
 
             // Update withdraw condition message
             const withdrawCondition = document.getElementById('withdrawCondition');
@@ -819,7 +819,7 @@
                 withdrawCondition.className = "processing";
                 withdrawBtn.disabled = true;
             } else {
-                withdrawCondition.textContent = `Note: You can withdraw up to $${(currentUser.totalDeposited / 2).toFixed(2)} (200% of your total deposits).`;
+                withdrawCondition.textContent = `Note: You can withdraw up to PKR${(currentUser.totalDeposited / 2).toFixed(2)} (200% of your total deposits).`;
                 withdrawCondition.className = "completed";
                 withdrawBtn.disabled = false;
             }
@@ -858,7 +858,7 @@
                 const rightDiv = document.createElement('div');
                 const amountSpan = document.createElement('span');
                 amountSpan.style.fontWeight = '600';
-                amountSpan.textContent = `$${tx.amount.toFixed(2)}`;
+                amountSpan.textContent = `PKR${tx.amount.toFixed(2)}`;
                 
                 const dateSpan = document.createElement('span');
                 dateSpan.style.color = '#aaa';
