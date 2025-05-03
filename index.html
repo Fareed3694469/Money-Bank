@@ -314,7 +314,7 @@
                     <p id="totalDeposited">$0.00</p>
                 </div>
                 <div class="stat-card">
-                    <h3><i class="fas fa-chart-line"></i> Daily Profit (10%)</h3>
+                    <h3><i class="fas fa-chart-line"></i> Daily Profit (3%)</h3>
                     <p id="dailyProfit">$0.00</p>
                 </div>
             </div>
@@ -724,7 +724,7 @@
 
         // Add daily profit (10%)
         function addDailyProfit() {
-            const profit = currentUser.totalDeposited * 0.10;
+            const profit = currentUser.totalDeposited * 0.3;
             currentUser.profit += profit;
             currentUser.balance += profit;
             currentUser.lastProfitTime = new Date().getTime();
@@ -819,7 +819,7 @@
                 withdrawCondition.className = "processing";
                 withdrawBtn.disabled = true;
             } else {
-                withdrawCondition.textContent = `Note: You can withdraw up to $${(currentUser.totalDeposited / 2).toFixed(2)} (50% of your total deposits).`;
+                withdrawCondition.textContent = `Note: You can withdraw up to $${(currentUser.totalDeposited / 2).toFixed(2)} (200% of your total deposits).`;
                 withdrawCondition.className = "completed";
                 withdrawBtn.disabled = false;
             }
