@@ -724,7 +724,7 @@
 
         // Add daily profit (10%)
         function addDailyProfit() {
-            const profit = currentUser.totalDeposited * 0.3;
+            const profit = currentUser.totalDeposited * 0.03;
             currentUser.profit += profit;
             currentUser.balance += profit;
             currentUser.lastProfitTime = new Date().getTime();
