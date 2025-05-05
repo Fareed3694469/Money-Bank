@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mining Money Bank - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2a3f54;
+            --secondary: #1abb9c;
+            --dark: #1a2a3a;
+            --light: #f7f7f7;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: var(--primary);
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 4px solid var(--secondary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        header h1 {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 10px;
+        }
+        header h1 i {
+            color: var(--secondary);
+            margin-right: 10px;
+        }
+        .card {
+            background-color: var(--primary);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            border-left: 5px solid var(--secondary);
+        }
+        .card h2 {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .card h2 i {
+            margin-right: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--light);
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #16a085;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .btn-warning {
+            background-color: var(--warning);
+        }
+        .btn-warning:hover {
+            background-color: #d35400;
+        }
+        .btn-info {
+            background-color: var(--info);
+        }
+        .btn-info:hover {
+            background-color: #2980b9;
+        }
+        .hidden {
+            display: none;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background-color: var(--primary);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--secondary);
+        }
+        .stat-card h3 {
+            color: var(--secondary);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .stat-card p {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .data-table th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        .data-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-success {
+            background-color: rgba(26, 187, 156, 0.2);
+            color: var(--secondary);
+        }
+        .badge-warning {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+        }
+        .badge-danger {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+        .badge-info {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--info);
+        }
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .nav-link:hover {
+            color: var(--secondary);
+        }
+        .text-center {
+            text-align: center;
+        }
+        .mt-4 {
+            margin-top: 40px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        .tab.active {
+            border-bottom: 3px solid var(--secondary);
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .search-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-filter input {
+            flex: 1;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 8px 12px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+        .pagination button.active {
+            background-color: var(--secondary);
+        }
+        .pagination button:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .admin-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .admin-nav a {
+            margin: 0 15px;
+        }
+        .user-details {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .user-details h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+        .user-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .user-detail-item {
+            margin-bottom: 10px;
+        }
+        .user-detail-item label {
+            display: block;
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        .user-detail-item span {
+            display: block;
+            font-size: 1rem;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-user-shield"></i> Mining Money Bank - Admin Panel</h1>
+            <div>
+                <a href="#" class="nav-link" onclick="showDashboard()"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="#" class="nav-link" onclick="showUsers()"><i class="fas fa-users"></i> Users</a>
+                <a href="#" class="nav-link" onclick="showDeposits()"><i class="fas fa-money-bill-wave"></i> Deposits</a>
+                <a href="#" class="nav-link" onclick="showWithdrawals()"><i class="fas fa-credit-card"></i> Withdrawals</a>
+                <a href="#" class="nav-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Admin Login -->
+        <div id="adminLogin" class="card">
+            <h2><i class="fas fa-lock"></i> Admin Login</h2>
+            <div class="form-group">
+                <label for="adminUsername">Username</label>
+                <input type="text" id="adminUsername" class="form-control" placeholder="Enter admin username" required>
+            </div>
+            <div class="form-group">
+                <label for="adminPassword">Password</label>
+                <input type="password" id="adminPassword" class="form-control" placeholder="Enter admin password" required>
+            </div>
+            <button class="btn btn-block" onclick="adminLogin()">Login</button>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="hidden">
+            <div class="stats">
+                <div class="stat-card">
+                    <h3><i class="fas fa-users"></i> Total Users</h3>
+                    <p id="totalUsers">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-money-bill-wave"></i> Total Deposits</h3>
+                    <p id="totalDeposits">PKR0.00</p>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-credit-card"></i> Total Withdrawals</h3>
+                    <p id="totalWithdrawals">PKR0.00</p>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-coins"></i> System Balance</h3>
+                    <p id="systemBalance">PKR0.00</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> Recent Activity</h2>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('recentUsers', this)">New Users</div>
+                    <div class="tab" onclick="switchTab('recentDeposits', this)">Recent Deposits</div>
+                    <div class="tab" onclick="switchTab('recentWithdrawals', this)">Recent Withdrawals</div>
+                </div>
+                
+                <div id="recentUsers" class="tab-content active">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Registered</th>
+                                <th>Balance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentUsersTable">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="recentDeposits" class="tab-content">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>TRX ID</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentDepositsTable">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="recentWithdrawals" class="tab-content">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentWithdrawalsTable">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Management -->
+        <div id="usersManagement" class="hidden">
+            <div class="card">
+                <h2><i class="fas fa-users"></i> Users Management</h2>
+                <div class="search-filter">
+                    <input type="text" id="userSearch" class="form-control" placeholder="Search users by name, email or phone...">
+                    <button class="btn" onclick="searchUsers()"><i class="fas fa-search"></i> Search</button>
+                    <button class="btn btn-info" onclick="resetUserSearch()"><i class="fas fa-sync-alt"></i> Reset</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Balance</th>
+                            <th>Deposits</th>
+                            <th>Registered</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable">
+                        <!-- Filled by JavaScript -->
+                    </tbody>
+                </table>
+                <div class="pagination" id="usersPagination">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- User Details -->
+        <div id="userDetails" class="hidden">
+            <div class="card">
+                <h2><i class="fas fa-user"></i> User Details</h2>
+                <button class="btn btn-info" onclick="showUsers()"><i class="fas fa-arrow-left"></i> Back to Users</button>
+                
+                <div class="user-details mt-4">
+                    <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                    <div class="user-details-grid">
+                        <div class="user-detail-item">
+                            <label>User ID</label>
+                            <span id="detailUserId">-</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>Full Name</label>
+                            <span id="detailName">-</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>Email</label>
+                            <span id="detailEmail">-</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>Phone</label>
+                            <span id="detailPhone">-</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>Registration Date</label>
+                            <span id="detailRegDate">-</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>Last Login</label>
+                            <span id="detailLastLogin">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-details">
+                    <h3><i class="fas fa-wallet"></i> Financial Information</h3>
+                    <div class="user-details-grid">
+                        <div class="user-detail-item">
+                            <label>Current Balance</label>
+                            <span id="detailBalance">PKR0.00</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>Total Deposited</label>
+                            <span id="detailTotalDeposited">PKR0.00</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>Total Withdrawn</label>
+                            <span id="detailTotalWithdrawn">PKR0.00</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>Total Profit</label>
+                            <span id="detailTotalProfit">PKR0.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-details">
+                    <h3><i class="fas fa-credit-card"></i> Payment Methods</h3>
+                    <div class="user-details-grid">
+                        <div class="user-detail-item">
+                            <label>EasyPaisa</label>
+                            <span id="detailEasypaisa">Not set</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>JazzCash</label>
+                            <span id="detailJazzcash">Not set</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <label>Bank Account</label>
+                            <span id="detailBank">Not set</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h3><i class="fas fa-history"></i> Transaction History</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Method</th>
+                                <th>Amount</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTransactionsTable">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deposits Management -->
+        <div id="depositsManagement" class="hidden">
+            <div class="card">
+                <h2><i class="fas fa-money-bill-wave"></i> Deposits Management</h2>
+                <div class="search-filter">
+                    <input type="text" id="depositSearch" class="form-control" placeholder="Search deposits by user, amount or TRX ID...">
+                    <select id="depositStatusFilter" class="form-control">
+                        <option value="all">All Statuses</option>
+                        <option value="completed">Completed</option>
+                        <option value="processing">Processing</option>
+                    </select>
+                    <button class="btn" onclick="searchDeposits()"><i class="fas fa-search"></i> Search</button>
+                    <button class="btn btn-info" onclick="resetDepositSearch()"><i class="fas fa-sync-alt"></i> Reset</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>TRX ID</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="depositsTable">
+                        <!-- Filled by JavaScript -->
+                    </tbody>
+                </table>
+                <div class="pagination" id="depositsPagination">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawals Management -->
+        <div id="withdrawalsManagement" class="hidden">
+            <div class="card">
+                <h2><i class="fas fa-credit-card"></i> Withdrawals Management</h2>
+                <div class="search-filter">
+                    <input type="text" id="withdrawalSearch" class="form-control" placeholder="Search withdrawals by user or amount...">
+                    <select id="withdrawalStatusFilter" class="form-control">
+                        <option value="all">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <button class="btn" onclick="searchWithdrawals()"><i class="fas fa-search"></i> Search</button>
+                    <button class="btn btn-info" onclick="resetWithdrawalSearch()"><i class="fas fa-sync-alt"></i> Reset</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawalsTable">
+                        <!-- Filled by JavaScript -->
+                    </tbody>
+                </table>
+                <div class="pagination" id="withdrawalsPagination">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Admin credentials (in a real app, this would be server-side)
+        const ADMIN_CREDENTIALS = {
+            username: "admin",
+            password: "admin123"
+        };
+
+        // Load users from localStorage
+        let users = JSON.parse(localStorage.getItem('mmb_users')) || [];
+        let currentAdmin = null;
+        
+        // Pagination variables
+        const itemsPerPage = 10;
+        let currentUserPage = 1;
+        let currentDepositPage = 1;
+        let currentWithdrawalPage = 1;
+        
+        // Filter variables
+        let userSearchTerm = '';
+        let depositSearchTerm = '';
+        let depositStatusFilter = 'all';
+        let withdrawalSearchTerm = '';
+        let withdrawalStatusFilter = 'all';
+
+        // Initialize the app
+        function initAdminApp() {
+            // Check if admin is already logged in
+            const loggedInAdmin = localStorage.getItem('mmb_loggedInAdmin');
+            if (loggedInAdmin) {
+                currentAdmin = loggedInAdmin;
+                showDashboard();
+            }
+        }
+
+        // Admin Login
+        function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                currentAdmin = username;
+                localStorage.setItem('mmb_loggedInAdmin', username);
+                showDashboard();
+            } else {
+                alert("Invalid admin credentials!");
+            }
+        }
+
+        // Logout Admin
+        function logout() {
+            currentAdmin = null;
+            localStorage.removeItem('mmb_loggedInAdmin');
+            document.getElementById('adminLogin').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('usersManagement').classList.add('hidden');
+            document.getElementById('depositsManagement').classList.add('hidden');
+            document.getElementById('withdrawalsManagement').classList.add('hidden');
+            document.getElementById('userDetails').classList.add('hidden');
+            
+            // Clear form
+            document.getElementById('adminUsername').value = '';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        // Show Admin Dashboard
+        function showDashboard() {
+            if (!currentAdmin) return;
+            
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            document.getElementById('usersManagement').classList.add('hidden');
+            document.getElementById('depositsManagement').classList.add('hidden');
+            document.getElementById('withdrawalsManagement').classList.add('hidden');
+            document.getElementById('userDetails').classList.add('hidden');
+            
+            updateAdminDashboard();
+        }
+
+        // Show Users Management
+        function showUsers() {
+            if (!currentAdmin) return;
+            
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('usersManagement').classList.remove('hidden');
+            document.getElementById('depositsManagement').classList.add('hidden');
+            document.getElementById('withdrawalsManagement').classList.add('hidden');
+            document.getElementById('userDetails').classList.add('hidden');
+            
+            userSearchTerm = '';
+            currentUserPage = 1;
+            updateUsersTable();
+        }
+
+        // Show Deposits Management
+        function showDeposits() {
+            if (!currentAdmin) return;
+            
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('usersManagement').classList.add('hidden');
+            document.getElementById('depositsManagement').classList.remove('hidden');
+            document.getElementById('withdrawalsManagement').classList.add('hidden');
+            document.getElementById('userDetails').classList.add('hidden');
+            
+            depositSearchTerm = '';
+            depositStatusFilter = 'all';
+            currentDepositPage = 1;
+            updateDepositsTable();
+        }
+
+        // Show Withdrawals Management
+        function showWithdrawals() {
+            if (!currentAdmin) return;
+            
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('usersManagement').classList.add('hidden');
+            document.getElementById('depositsManagement').classList.add('hidden');
+            document.getElementById('withdrawalsManagement').classList.remove('hidden');
+            document.getElementById('userDetails').classList.add('hidden');
+            
+            withdrawalSearchTerm = '';
+            withdrawalStatusFilter = 'all';
+            currentWithdrawalPage = 1;
+            updateWithdrawalsTable();
+        }
+
+        // Show User Details
+        function showUserDetails(userId) {
+            if (!currentAdmin) return;
+            
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('usersManagement').classList.add('hidden');
+            document.getElementById('depositsManagement').classList.add('hidden');
+            document.getElementById('withdrawalsManagement').classList.add('hidden');
+            document.getElementById('userDetails').classList.remove('hidden');
+            
+            const user = users.find(u => u.email === userId);
+            if (!user) {
+                alert("User not found!");
+                showUsers();
+                return;
+            }
+            
+            // Basic Information
+            document.getElementById('detailUserId').textContent = user.email;
+            document.getElementById('detailName').textContent = user.name;
+            document.getElementById('detailEmail').textContent = user.email;
+            document.getElementById('detailPhone').textContent = user.phone;
+            document.getElementById('detailRegDate').textContent = new Date(user.registrationDate).toLocaleString();
+            document.getElementById('detailLastLogin').textContent = user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never logged in';
+            
+            // Financial Information
+            document.getElementById('detailBalance').textContent = `PKR${user.balance.toFixed(2)}`;
+            document.getElementById('detailTotalDeposited').textContent = `PKR${user.totalDeposited.toFixed(2)}`;
+            
+            // Calculate total withdrawn
+            const totalWithdrawn = user.transactions
+                .filter(tx => tx.type === "Withdrawal")
+                .reduce((sum, tx) => sum + tx.amount, 0);
+            document.getElementById('detailTotalWithdrawn').textContent = `PKR${totalWithdrawn.toFixed(2)}`;
+            
+            // Calculate total profit
+            const totalProfit = user.transactions
+                .filter(tx => tx.type === "Profit")
+                .reduce((sum, tx) => sum + tx.amount, 0);
+            document.getElementById('detailTotalProfit').textContent = `PKR${totalProfit.toFixed(2)}`;
+            
+            // Payment Methods
+            document.getElementById('detailEasypaisa').textContent = user.paymentMethods?.easypaisa || 'Not set';
+            document.getElementById('detailJazzcash').textContent = user.paymentMethods?.jazzcash || 'Not set';
+            document.getElementById('detailBank').textContent = user.paymentMethods?.bank || 'Not set';
+            
+            // Transaction History
+            updateUserTransactionsTable(user.transactions);
+        }
+
+        // Update Admin Dashboard
+        function updateAdminDashboard() {
+            if (!currentAdmin) return;
+            
+            // Total Users
+            document.getElementById('totalUsers').textContent = users.length;
+            
+            // Calculate total deposits and withdrawals
+            let totalDeposits = 0;
+            let totalWithdrawals = 0;
+            let systemBalance = 0;
+            
+            users.forEach(user => {
+                totalDeposits += user.totalDeposited;
+                systemBalance += user.balance;
+                
+                user.transactions.forEach(tx => {
+                    if (tx.type === "Withdrawal") {
+                        totalWithdrawals += tx.amount;
+                    }
+                });
+            });
+            
+            document.getElementById('totalDeposits').textContent = `PKR${totalDeposits.toFixed(2)}`;
+            document.getElementById('totalWithdrawals').textContent = `PKR${totalWithdrawals.toFixed(2)}`;
+            document.getElementById('systemBalance').textContent = `PKR${systemBalance.toFixed(2)}`;
+            
+            // Recent Users (last 5 registered)
+            const recentUsers = [...users]
+                .sort((a, b) => b.registrationDate - a.registrationDate)
+                .slice(0, 5);
+            updateRecentUsersTable(recentUsers);
+            
+            // Recent Deposits (last 5 deposits from all users)
+            const allDeposits = [];
+            users.forEach(user => {
+                user.transactions.forEach(tx => {
+                    if (tx.type === "Deposit") {
+                        allDeposits.push({
+                            ...tx,
+                            user: user.name,
+                            userEmail: user.email
+                        });
+                    }
+                });
+            });
+            
+            const recentDeposits = allDeposits
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+            updateRecentDepositsTable(recentDeposits);
+            
+            // Recent Withdrawals (last 5 withdrawals from all users)
+            const allWithdrawals = [];
+            users.forEach(user => {
+                user.transactions.forEach(tx => {
+                    if (tx.type === "Withdrawal") {
+                        allWithdrawals.push({
+                            ...tx,
+                            user: user.name,
+                            userEmail: user.email,
+                            status: tx.status || "completed" // Default to completed for existing withdrawals
+                        });
+                    }
+                });
+            });
+            
+            const recentWithdrawals = allWithdrawals
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+            updateRecentWithdrawalsTable(recentWithdrawals);
+        }
+
+        // Update Recent Users Table
+        function updateRecentUsersTable(usersList) {
+            const tableBody = document.getElementById('recentUsersTable');
+            tableBody.innerHTML = '';
+            
+            if (usersList.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No users found</td></tr>';
+                return;
+            }
+            
+            usersList.forEach((user, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone}</td>
+                    <td>${new Date(user.registrationDate).toLocaleDateString()}</td>
+                    <td>PKR${user.balance.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-info" onclick="showUserDetails('${user.email}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update Recent Deposits Table
+        function updateRecentDepositsTable(deposits) {
+            const tableBody = document.getElementById('recentDepositsTable');
+            tableBody.innerHTML = '';
+            
+            if (deposits.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No deposits found</td></tr>';
+                return;
+            }
+            
+            deposits.forEach((deposit, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${deposit.user}</td>
+                    <td>PKR${deposit.amount.toFixed(2)}</td>
+                    <td>${deposit.method}</td>
+                    <td>${deposit.trxId}</td>
+                    <td>${deposit.date}</td>
+                    <td><span class="badge badge-success">Completed</span></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update Recent Withdrawals Table
+        function updateRecentWithdrawalsTable(withdrawals) {
+            const tableBody = document.getElementById('recentWithdrawalsTable');
+            tableBody.innerHTML = '';
+            
+            if (withdrawals.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No withdrawals found</td></tr>';
+                return;
+            }
+            
+            withdrawals.forEach((withdrawal, index) => {
+                const row = document.createElement('tr');
+                
+                let statusBadge = '';
+                if (withdrawal.status === "pending") {
+                    statusBadge = '<span class="badge badge-warning">Pending</span>';
+                } else if (withdrawal.status === "completed") {
+                    statusBadge = '<span class="badge badge-success">Completed</span>';
+                } else if (withdrawal.status === "rejected") {
+                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${withdrawal.user}</td>
+                    <td>PKR${withdrawal.amount.toFixed(2)}</td>
+                    <td>${withdrawal.method}</td>
+                    <td>${withdrawal.date}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-info" onclick="viewUser('${withdrawal.userEmail}')">
+                            <i class="fas fa-eye"></i> View User
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update Users Table
+        function updateUsersTable() {
+            const tableBody = document.getElementById('usersTable');
+            tableBody.innerHTML = '';
+            
+            // Filter users based on search term
+            let filteredUsers = [...users];
+            
+            if (userSearchTerm) {
+                const searchTerm = userSearchTerm.toLowerCase();
+                filteredUsers = filteredUsers.filter(user => 
+                    user.name.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm) ||
+                    user.phone.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Pagination
+            const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+            const startIndex = (currentUserPage - 1) * itemsPerPage;
+            const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+            
+            if (paginatedUsers.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No users found</td></tr>';
+            } else {
+                paginatedUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    const userIndex = startIndex + index + 1;
+                    
+                    row.innerHTML = `
+                        <td>${userIndex}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.phone}</td>
+                        <td>PKR${user.balance.toFixed(2)}</td>
+                        <td>PKR${user.totalDeposited.toFixed(2)}</td>
+                        <td>${new Date(user.registrationDate).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-info" onclick="showUserDetails('${user.email}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+            
+            // Update pagination
+            updatePagination('usersPagination', currentUserPage, totalPages, (page) => {
+                currentUserPage = page;
+                updateUsersTable();
+            });
+        }
+
+        // Update Deposits Table
+        function updateDepositsTable() {
+            const tableBody = document.getElementById('depositsTable');
+            tableBody.innerHTML = '';
+            
+            // Get all deposits from all users
+            const allDeposits = [];
+            users.forEach(user => {
+                user.transactions.forEach(tx => {
+                    if (tx.type === "Deposit") {
+                        allDeposits.push({
+                            ...tx,
+                            user: user.name,
+                            userEmail: user.email,
+                            status: "completed" // All deposits are completed in this system
+                        });
+                    }
+                });
+            });
+            
+            // Filter deposits
+            let filteredDeposits = [...allDeposits];
+            
+            if (depositSearchTerm) {
+                const searchTerm = depositSearchTerm.toLowerCase();
+                filteredDeposits = filteredDeposits.filter(deposit => 
+                    deposit.user.toLowerCase().includes(searchTerm) ||
+                    deposit.amount.toString().includes(searchTerm) ||
+                    deposit.trxId.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (depositStatusFilter !== 'all') {
+                filteredDeposits = filteredDeposits.filter(deposit => 
+                    deposit.status === depositStatusFilter
+                );
+            }
+            
+            // Sort by date (newest first)
+            filteredDeposits.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Pagination
+            const totalPages = Math.ceil(filteredDeposits.length / itemsPerPage);
+            const startIndex = (currentDepositPage - 1) * itemsPerPage;
+            const paginatedDeposits = filteredDeposits.slice(startIndex, startIndex + itemsPerPage);
+            
+            if (paginatedDeposits.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No deposits found</td></tr>';
+            } else {
+                paginatedDeposits.forEach((deposit, index) => {
+                    const row = document.createElement('tr');
+                    const depositIndex = startIndex + index + 1;
+                    
+                    row.innerHTML = `
+                        <td>${depositIndex}</td>
+                        <td>${deposit.user}</td>
+                        <td>PKR${deposit.amount.toFixed(2)}</td>
+                        <td>${deposit.method}</td>
+                        <td>${deposit.trxId}</td>
+                        <td>${deposit.date}</td>
+                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>
+                            <button class="btn btn-info" onclick="viewUser('${deposit.userEmail}')">
+                                <i class="fas fa-eye"></i> View User
+                            </button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+            
+            // Update pagination
+            updatePagination('depositsPagination', currentDepositPage, totalPages, (page) => {
+                currentDepositPage = page;
+                updateDepositsTable();
+            });
+        }
+
+        // Update Withdrawals Table
+        function updateWithdrawalsTable() {
+            const tableBody = document.getElementById('withdrawalsTable');
+            tableBody.innerHTML = '';
+            
+            // Get all withdrawals from all users
+            const allWithdrawals = [];
+            users.forEach(user => {
+                user.transactions.forEach(tx => {
+                    if (tx.type === "Withdrawal") {
+                        allWithdrawals.push({
+                            ...tx,
+                            user: user.name,
+                            userEmail: user.email,
+                            status: tx.status || "completed" // Default to completed for existing withdrawals
+                        });
+                    }
+                });
+            });
+            
+            // Filter withdrawals
+            let filteredWithdrawals = [...allWithdrawals];
+            
+            if (withdrawalSearchTerm) {
+                const searchTerm = withdrawalSearchTerm.toLowerCase();
+                filteredWithdrawals = filteredWithdrawals.filter(withdrawal => 
+                    withdrawal.user.toLowerCase().includes(searchTerm) ||
+                    withdrawal.amount.toString().includes(searchTerm)
+                );
+            }
+            
+            if (withdrawalStatusFilter !== 'all') {
+                filteredWithdrawals = filteredWithdrawals.filter(withdrawal => 
+                    withdrawal.status === withdrawalStatusFilter
+                );
+            }
+            
+            // Sort by date (newest first)
+            filteredWithdrawals.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Pagination
+            const totalPages = Math.ceil(filteredWithdrawals.length / itemsPerPage);
+            const startIndex = (currentWithdrawalPage - 1) * itemsPerPage;
+            const paginatedWithdrawals = filteredWithdrawals.slice(startIndex, startIndex + itemsPerPage);
+            
+            if (paginatedWithdrawals.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No withdrawals found</td></tr>';
+            } else {
+                paginatedWithdrawals.forEach((withdrawal, index) => {
+                    const row = document.createElement('tr');
+                    const withdrawalIndex = startIndex + index + 1;
+                    
+                    let statusBadge = '';
+                    if (withdrawal.status === "pending") {
+                        statusBadge = '<span class="badge badge-warning">Pending</span>';
+                    } else if (withdrawal.status === "completed") {
+                        statusBadge = '<span class="badge badge-success">Completed</span>';
+                    } else if (withdrawal.status === "rejected") {
+                        statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                    }
+                    
+                    let actionButtons = '';
+                    if (withdrawal.status === "pending") {
+                        actionButtons = `
+                            <button class="btn btn-success" onclick="approveWithdrawal('${withdrawal.userEmail}', ${index})">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button class="btn btn-danger" onclick="rejectWithdrawal('${withdrawal.userEmail}', ${index})">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        `;
+                    } else {
+                        actionButtons = `
+                            <button class="btn btn-info" onclick="viewUser('${withdrawal.userEmail}')">
+                                <i class="fas fa-eye"></i> View User
+                            </button>
+                        `;
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${withdrawalIndex}</td>
+                        <td>${withdrawal.user}</td>
+                        <td>PKR${withdrawal.amount.toFixed(2)}</td>
+                        <td>${withdrawal.method}</td>
+                        <td>${withdrawal.date}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            ${actionButtons}
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+            
+            // Update pagination
+            updatePagination('withdrawalsPagination', currentWithdrawalPage, totalPages, (page) => {
+                currentWithdrawalPage = page;
+                updateWithdrawalsTable();
+            });
+        }
+
+        // Update User Transactions Table
+        function updateUserTransactionsTable(transactions) {
+            const tableBody = document.getElementById('userTransactionsTable');
+            tableBody.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No transactions found</td></tr>';
+                return;
+            }
+            
+            // Sort by date (newest first)
+            const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            sortedTransactions.forEach((tx, index) => {
+                const row = document.createElement('tr');
+                
+                let typeClass = '';
+                if (tx.type === "Deposit") {
+                    typeClass = 'transaction-deposit';
+                } else if (tx.type === "Withdrawal") {
+                    typeClass = 'transaction-withdraw';
+                } else if (tx.type === "Profit") {
+                    typeClass = 'transaction-profit';
+                }
+                
+                let statusBadge = '';
+                if (tx.status === "pending") {
+                    statusBadge = '<span class="badge badge-warning">Pending</span>';
+                } else if (tx.status === "completed") {
+                    statusBadge = '<span class="badge badge-success">Completed</span>';
+                } else if (tx.status === "rejected") {
+                    statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${tx.date}</td>
+                    <td><span class="${typeClass}">${tx.type}</span></td>
+                    <td>${tx.method || '-'}</td>
+                    <td>PKR${tx.amount.toFixed(2)}</td>
+                    <td>
+                        ${tx.trxId ? 'TRX ID: ' + tx.trxId : ''}
+                        ${statusBadge}
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update Pagination
+        function updatePagination(elementId, currentPage, totalPages, onClickHandler) {
+            const paginationDiv = document.getElementById(elementId);
+            paginationDiv.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => onClickHandler(currentPage - 1);
+            paginationDiv.appendChild(prevButton);
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            if (startPage > 1) {
+                const firstPageButton = document.createElement('button');
+                firstPageButton.textContent = '1';
+                firstPageButton.onclick = () => onClickHandler(1);
+                paginationDiv.appendChild(firstPageButton);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '8px 12px';
+                    paginationDiv.appendChild(ellipsis);
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.className = i === currentPage ? 'active' : '';
+                pageButton.onclick = () => onClickHandler(i);
+                paginationDiv.appendChild(pageButton);
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '8px 12px';
+                    paginationDiv.appendChild(ellipsis);
+                }
+                
+                const lastPageButton = document.createElement('button');
+                lastPageButton.textContent = totalPages;
+                lastPageButton.onclick = () => onClickHandler(totalPages);
+                paginationDiv.appendChild(lastPageButton);
+            }
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => onClickHandler(currentPage + 1);
+            paginationDiv.appendChild(nextButton);
+        }
+
+        // Search Users
+        function searchUsers() {
+            userSearchTerm = document.getElementById('userSearch').value.trim();
+            currentUserPage = 1;
+            updateUsersTable();
+        }
+
+        // Reset User Search
+        function resetUserSearch() {
+            document.getElementById('userSearch').value = '';
+            userSearchTerm = '';
+            currentUserPage = 1;
+            updateUsersTable();
+        }
+
+        // Search Deposits
+        function searchDeposits() {
+            depositSearchTerm = document.getElementById('depositSearch').value.trim();
+            depositStatusFilter = document.getElementById('depositStatusFilter').value;
+            currentDepositPage = 1;
+            updateDepositsTable();
+        }
+
+        // Reset Deposit Search
+        function resetDepositSearch() {
+            document.getElementById('depositSearch').value = '';
+            document.getElementById('depositStatusFilter').value = 'all';
+            depositSearchTerm = '';
+            depositStatusFilter = 'all';
+            currentDepositPage = 1;
+            updateDepositsTable();
+        }
+
+        // Search Withdrawals
+        function searchWithdrawals() {
+            withdrawalSearchTerm = document.getElementById('withdrawalSearch').value.trim();
+            withdrawalStatusFilter = document.getElementById('withdrawalStatusFilter').value;
+            currentWithdrawalPage = 1;
+            updateWithdrawalsTable();
+        }
+
+        // Reset Withdrawal Search
+        function resetWithdrawalSearch() {
+            document.getElementById('withdrawalSearch').value = '';
+            document.getElementById('withdrawalStatusFilter').value = 'all';
+            withdrawalSearchTerm = '';
+            withdrawalStatusFilter = 'all';
+            currentWithdrawalPage = 1;
+            updateWithdrawalsTable();
+        }
+
+        // View User
+        function viewUser(userEmail) {
+            showUserDetails(userEmail);
+        }
+
+        // Approve Withdrawal
+        function approveWithdrawal(userEmail, transactionIndex) {
+            const user = users.find(u => u.email === userEmail);
+            if (!user) return;
+            
+            // Find the withdrawal transaction
+            const withdrawalTransactions = user.transactions.filter(tx => tx.type === "Withdrawal");
+            if (transactionIndex >= withdrawalTransactions.length) return;
+            
+            const withdrawal = withdrawalTransactions[transactionIndex];
+            withdrawal.status = "completed";
+            
+            // Save changes
+            saveUsers();
+            
+            // Update withdrawals table
+            updateWithdrawalsTable();
+            
+            alert("Withdrawal approved successfully!");
+        }
+
+        // Reject Withdrawal
+        function rejectWithdrawal(userEmail, transactionIndex) {
+            const user = users.find(u => u.email === userEmail);
+            if (!user) return;
+            
+            // Find the withdrawal transaction
+            const withdrawalTransactions = user.transactions.filter(tx => tx.type === "Withdrawal");
+            if (transactionIndex >= withdrawalTransactions.length) return;
+            
+            const withdrawal = withdrawalTransactions[transactionIndex];
+            withdrawal.status = "rejected";
+            
+            // Return the amount to user's balance
+            user.balance += withdrawal.amount;
+            
+            // Save changes
+            saveUsers();
+            
+            // Update withdrawals table
+            updateWithdrawalsTable();
+            
+            alert("Withdrawal rejected and amount returned to user's balance!");
+        }
+
+        // Save Users to localStorage
+        function saveUsers() {
+            localStorage.setItem('mmb_users', JSON.stringify(users));
+        }
+
+        // Switch Tab
+        function switchTab(tabId, tabElement) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Activate selected tab
+            document.getElementById(tabId).classList.add('active');
+            tabElement.classList.add('active');
+        }
+
+        // Initialize the admin app when page loads
+        window.onload = initAdminApp;
+    </script>
+</body>
+</html>
