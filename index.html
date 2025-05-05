@@ -317,6 +317,10 @@
                     <h3><i class="fas fa-chart-line"></i> Daily Profit (3%)</h3>
                     <p id="dailyProfit">PKR0.00</p>
                 </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-clock"></i> Next Profit In</h3>
+                    <p id="nextProfitTime">00:00:00</p>
+                </div>
             </div>
 
             <div class="card">
@@ -324,7 +328,7 @@
                 <div class="form-group">
                     <label for="depositMethod">Payment Method</label>
                     <select id="depositMethod" class="form-control">
-                        <option value="nayapay">Nayapay (Account: updaring)</option>
+                        <option value="nayapay">Nayapay (Account: updating)</option>
                         <option value="easypaisa">EasyPaisa (Account: updating)</option>
                         <option value="jazzcash">JazzCash (Account: 03250416566)</option>
                         <option value="crypto">Crypto (TRX: TYniZoq95Paj5zYFTuqmMKQV6xX5DJy2th)</option>
@@ -451,6 +455,7 @@
         let users = JSON.parse(localStorage.getItem('mmb_users')) || [];
         let currentUser = null;
         let profitInterval;
+        let profitTimerInterval;
 
         // Initialize the app
         function initApp() {
@@ -462,10 +467,11 @@
                     currentUser = user;
                     showDashboard();
                     startProfitCalculation();
+                    startProfitTimer();
                     
                     // Check if profit needs to be added (based on last profit time)
                     const now = new Date().getTime();
-                    const lastProfitTime = currentUser.lastProfitTime || 0;
+                    const lastProfitTime = currentUser.lastProfitTime || now;
                     const hoursSinceLastProfit = (now - lastProfitTime) / (1000 * 60 * 60);
                     
                     if (hoursSinceLastProfit >= 24 && currentUser.totalDeposited > 0) {
@@ -488,6 +494,7 @@
             document.getElementById('profileSection').classList.add('hidden');
             document.getElementById('authLinks').classList.remove('hidden');
             document.getElementById('userNav').classList.add('hidden');
+            clearInterval(profitTimerInterval);
         }
 
         // Show Login Form
@@ -498,6 +505,7 @@
             document.getElementById('profileSection').classList.add('hidden');
             document.getElementById('authLinks').classList.remove('hidden');
             document.getElementById('userNav').classList.add('hidden');
+            clearInterval(profitTimerInterval);
         }
 
         // Show Dashboard
@@ -509,6 +517,7 @@
             document.getElementById('authLinks').classList.add('hidden');
             document.getElementById('userNav').classList.remove('hidden');
             updateDashboard();
+            startProfitTimer();
         }
 
         // Show Profile
@@ -581,7 +590,7 @@
                 depositHistory: [],
                 registrationDate: new Date().getTime(),
                 paymentMethods: {},
-                lastProfitTime: 0
+                lastProfitTime: new Date().getTime()
             };
             
             users.push(newUser);
@@ -602,10 +611,11 @@
                 localStorage.setItem('mmb_loggedInUser', email);
                 showDashboard();
                 startProfitCalculation();
+                startProfitTimer();
                 
                 // Check if profit needs to be added
                 const now = new Date().getTime();
-                const lastProfitTime = currentUser.lastProfitTime || 0;
+                const lastProfitTime = currentUser.lastProfitTime || now;
                 const hoursSinceLastProfit = (now - lastProfitTime) / (1000 * 60 * 60);
                 
                 if (hoursSinceLastProfit >= 24 && currentUser.totalDeposited > 0) {
@@ -619,6 +629,7 @@
         // Logout User
         function logout() {
             clearInterval(profitInterval);
+            clearInterval(profitTimerInterval);
             currentUser = null;
             localStorage.removeItem('mmb_loggedInUser');
             showLogin();
@@ -666,11 +677,17 @@
                 updateDashboard();
                 document.getElementById('depositStatus').textContent = "Deposit completed successfully!";
                 document.getElementById('depositStatus').className = "completed";
-                alert(`$${amount.toFixed(2)} deposited via ${method}. Transaction ID: ${trxId}`);
+                alert(`PKR${amount.toFixed(2)} deposited via ${method}. Transaction ID: ${trxId}`);
                 
                 // Clear form
                 document.getElementById('depositAmount').value = '';
                 document.getElementById('trxId').value = '';
+                
+                // Start profit calculation if not already running
+                if (currentUser.totalDeposited > 0 && !profitInterval) {
+                    startProfitCalculation();
+                    startProfitTimer();
+                }
             }, 300000); // 5 minutes = 300,000 milliseconds
         }
 
@@ -715,16 +732,18 @@
                 updateDashboard();
                 document.getElementById('withdrawStatus').textContent = "Withdrawal completed successfully!";
                 document.getElementById('withdrawStatus').className = "completed";
-                alert(`$${amount.toFixed(2)} withdrawn via ${method}.`);
+                alert(`PKR${amount.toFixed(2)} withdrawn via ${method}.`);
                 
                 // Clear form
                 document.getElementById('withdrawAmount').value = '';
             }, 300000); // 5 minutes
         }
 
-        // Add daily profit (10%)
+        // Add daily profit (3%)
         function addDailyProfit() {
-            const profit = currentUser.totalDeposited * 0.03;
+            if (currentUser.totalDeposited <= 0) return;
+            
+            const profit = currentUser.totalDeposited * 0.03; // 3% daily profit
             currentUser.profit += profit;
             currentUser.balance += profit;
             currentUser.lastProfitTime = new Date().getTime();
@@ -745,12 +764,16 @@
             profitNotification.className = 'profit-notification';
             profitNotification.innerHTML = `
                 <p>Daily Profit Added: PKR${profit.toFixed(2)}</p>
+                <small>3% of your total deposits (PKR${currentUser.totalDeposited.toFixed(2)})</small>
             `;
             document.body.appendChild(profitNotification);
             
             setTimeout(() => {
                 profitNotification.remove();
             }, 5000);
+            
+            // Reset the profit timer
+            startProfitTimer();
         }
 
         // Start profit calculation timer (24 hours)
@@ -762,6 +785,35 @@
                     addDailyProfit();
                 }
             }, 86400000); // 24 hours in milliseconds
+        }
+
+        // Start profit countdown timer
+        function startProfitTimer() {
+            clearInterval(profitTimerInterval);
+            
+            function updateTimer() {
+                if (!currentUser) return;
+                
+                const now = new Date().getTime();
+                const lastProfitTime = currentUser.lastProfitTime || now;
+                const nextProfitTime = lastProfitTime + 86400000; // 24 hours after last profit
+                const timeLeft = nextProfitTime - now;
+                
+                if (timeLeft <= 0 && currentUser.totalDeposited > 0) {
+                    addDailyProfit();
+                    return;
+                }
+                
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                
+                document.getElementById('nextProfitTime').textContent = 
+                    `${Math.floor(hours).toString().padStart(2, '0')}:${Math.floor(minutes).toString().padStart(2, '0')}:${Math.floor(seconds).toString().padStart(2, '0')}`;
+            }
+            
+            updateTimer();
+            profitTimerInterval = setInterval(updateTimer, 1000);
         }
 
         // Save payment methods
@@ -819,7 +871,7 @@
                 withdrawCondition.className = "processing";
                 withdrawBtn.disabled = true;
             } else {
-                withdrawCondition.textContent = `Note: You can withdraw up to PKR${(currentUser.totalDeposited / 2).toFixed(2)} (200% of your total deposits).`;
+                withdrawCondition.textContent = `Note: You can withdraw up to PKR${(currentUser.totalDeposited / 2).toFixed(2)} (50% of your total deposits).`;
                 withdrawCondition.className = "completed";
                 withdrawBtn.disabled = false;
             }
